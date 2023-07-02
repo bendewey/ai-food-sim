@@ -115,7 +115,7 @@ class Person:
     def get_data(self, food):
         self.radars.clear()
 
-        if (food.__len__() == 0): return [-1]
+        if (food.__len__() == 0): return [self.position[0], self.position[1], self.position[0], self.position[1], -1]
         self.age += 1
         closest_food = food[0]
         closest_food_distance = 10000
@@ -140,9 +140,9 @@ class Person:
 
         #print(f'age={self.age}, alive={self.alive}')
         #print(f'distance={food_distance}, angle={food_angle}')
-        if self.age > 60: self.alive = False
+        if self.age > 50: self.alive = False
 
-        return [closest_food_angle]
+        return [self.position[0], self.position[1], closest_food.position[0], closest_food.position[1], closest_food_angle]
    
 class Food(pygame.sprite.Sprite):
     def __init__(self,type):
@@ -271,9 +271,12 @@ def run_simulation(genomes, config):
             outFloat = output[0]
             #print(outFloat)
 
-            newAngle = int((360 * outFloat) % 360)
-            #print(f'{input[0]} - new={newAngle}')
-            person.angle = newAngle#person.get_data(food)[0]
+            newAngle = abs(int(360 * outFloat)) % 360
+            #print(f'{input[4]} - out={outFloat} new={newAngle}')
+            #use angle
+            #person.angle = input[4]
+            #use network
+            person.angle = newAngle
 
         # Check If Car Is Still Alive
         # Increase Fitness If Yes And Break Loop If Not
@@ -312,7 +315,7 @@ def run_simulation(genomes, config):
         screen.blit(text, text_rect)
 
         pygame.display.flip()
-        clock.tick(30) # 60 FPS
+        clock.tick(50) # 60 FPS
 
 if __name__ == "__main__":
     
