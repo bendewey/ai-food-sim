@@ -2,3 +2,7 @@
 
 1. Run `pip install -r requirements.txt`
 2. Run `python foodsim.py`
+
+# Background
+
+Based on the car simulation from https://github.com/NeuralNine/ai-car-simulation
