@@ -126,7 +126,7 @@ class Person:
             distance = r[0]
             angle = r[1]
 
-            if distance < 50:
+            if abs(distance) < 50:
                 f.kill()
                 food.remove(f)
                 self.food_eaten += 1
@@ -141,7 +141,7 @@ class Person:
 
         #print(f'age={self.age}, alive={self.alive}')
         #print(f'distance={food_distance}, angle={food_angle}')
-        if self.age > 40: self.alive = False
+        if self.age > 30: self.alive = False
 
         return [closest_food_distance, closest_food_angle]
    
@@ -318,7 +318,7 @@ def run_simulation(genomes, config):
         screen.blit(text, text_rect)
 
         pygame.display.flip()
-        clock.tick(10) # 60 FPS
+        clock.tick(30) # 60 FPS
 
 if __name__ == "__main__":
     
