@@ -65,7 +65,7 @@ class Person:
             position = radar
             pygame.draw.line(screen, (0, 255, 0), self.center, position, 1)
             pygame.draw.circle(screen, (0, 255, 0), position, 5)
-        text = self.direction_font.render(str(self.radar_direction) + '-' + str(int(self.angle)), True, (0, 0, 0))
+        text = self.direction_font.render(str(self.direction) + '-' + str(self.food_eaten), True, (0, 0, 0))
         text_rect = text.get_rect()
         text_rect.center = self.center
         screen.blit(text, text_rect)
@@ -77,7 +77,8 @@ class Person:
         # -- 360/8 = 45
         if self.angle < 0: return
 
-        direction = int((self.angle) / 45)
+        #direction = int((self.angle) / 45)
+        direction = self.direction
         self.radar_direction = direction
         #print(f'angle={int(self.angle)} dir={direction}')
         if direction == 0:
@@ -115,7 +116,7 @@ class Person:
     def get_data(self, food):
         self.radars.clear()
 
-        if (food.__len__() == 0): return [self.position[0], self.position[1], self.position[0], self.position[1], -1]
+        if (food.__len__() == 0): return [-1, -1]
         self.age += 1
         closest_food = food[0]
         closest_food_distance = 10000
@@ -136,13 +137,13 @@ class Person:
                 closest_food_angle = angle
                 closest_food = f
 
-        self.radars.append(closest_food.position)
+        self.radars.append([closest_food.position[0]+25, closest_food.position[1]+25])
 
         #print(f'age={self.age}, alive={self.alive}')
         #print(f'distance={food_distance}, angle={food_angle}')
-        if self.age > 50: self.alive = False
+        if self.age > 40: self.alive = False
 
-        return [self.position[0], self.position[1], closest_food.position[0], closest_food.position[1], closest_food_angle]
+        return [closest_food_distance, closest_food_angle]
    
 class Food(pygame.sprite.Sprite):
     def __init__(self,type):
@@ -176,12 +177,12 @@ class Food(pygame.sprite.Sprite):
 
     def update(self):
         self.animation_state()
-        self.rect.x -= 6
-        self.destroy()
+        #self.rect.x -= 6
+        #self.destroy()
 
     def destroy(self):
-        if self.rect.x <= -100: 
-            self.kill()
+        #if self.rect.x <= -100: 
+        self.kill()
 
 def calculate_angle_between_points(p1, p2):
     #quadrants
@@ -196,9 +197,11 @@ def calculate_angle_between_points(p1, p2):
     elif xdif >= 0 and ydif >= 0: quadrant = 2  
 
     if xdif == 0:
+        #print('xdif=0')
         distance = ydif
         food_angle = 0
     if ydif == 0:
+        #print(f'ydif=0, xdif={xdif}')
         distance = xdif
         food_angle = 0
     else:
@@ -208,7 +211,7 @@ def calculate_angle_between_points(p1, p2):
         if food_angle < 0: food_angle = 90 + food_angle
     
     
-    #print(f'xd={xdif}, yd={ydif}, q={quadrant}, fa={food_angle}')
+    #print(f'xd={xdif}, yd={ydif}, d={int(distance)}, q={quadrant}, fa={food_angle}')
     angle = food_angle + ((quadrant-1) * 90)
     return [distance, angle]
 
@@ -267,16 +270,16 @@ def run_simulation(genomes, config):
         for i, person in enumerate(people):
             input = person.get_data(food)
             output = nets[i].activate(input)
-            #choice = output.index(max(output))
-            outFloat = output[0]
+            dir = output.index(max(output))
+            #dir = int(input[1] / 45)
+            #outFloat = output[0]
             #print(outFloat)
 
-            newAngle = abs(int(360 * outFloat)) % 360
+            #newAngle = abs(int(360 * outFloat)) % 360
             #print(f'{input[4]} - out={outFloat} new={newAngle}')
-            #use angle
-            #person.angle = input[4]
-            #use network
-            person.angle = newAngle
+            #person.angle = input[1]
+            #print(f'dir={dir}, angle={input[1]}')
+            person.direction = dir
 
         # Check If Car Is Still Alive
         # Increase Fitness If Yes And Break Loop If Not
@@ -315,7 +318,7 @@ def run_simulation(genomes, config):
         screen.blit(text, text_rect)
 
         pygame.display.flip()
-        clock.tick(50) # 60 FPS
+        clock.tick(10) # 60 FPS
 
 if __name__ == "__main__":
     
